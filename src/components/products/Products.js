@@ -5,8 +5,6 @@ import './products.css'
 
 const Products = ({items}) => {
 
-    console.log('Items: ', items);
-
     return (
         <div className="container my-5">
             <div className="row">

@@ -5,3 +5,11 @@
 .my-col {
     border: 3px dashed blue;
 }
+
+.no-item {
+    color: red;
+    margin: auto;
+    width: 50%;
+    align-items: center;
+    padding-top: 10rem;
+}
