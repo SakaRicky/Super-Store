@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
+import _ from "lodash";
+
 import itemsServices from '../../../services/items'
 import ProductsOnDeals from '../../products/Products'
 import SearchBar from '../../searchbar/Searchbar'
@@ -19,6 +21,8 @@ const Deals = () => {
     const [noItems, setNoItems] = useState(false)
     // page number we are currently in
     const [currentPageNumber, setCurrentPageNumber] = useState(0)
+    // // state to keep if deals loaded from backend
+    // const [deals_loaded, setDealsLoaded] = useState(initialState)
 
     useEffect(() => {
         const fetch_deals = async () => {
@@ -52,15 +56,61 @@ const Deals = () => {
         }
     }
 
-    const deals_to_display = isLoading === false && deals.length === 0 ? <div className="noDeals"><h1>No Deals available at the moment</h1></div> : <ProductsOnDeals items={deals}/>
+    const handleNextPage = () => {
+        setCurrentPageNumber(currentPageNumber+1)
+    }
+
+    const handlePreviousPage = () => {
+        setCurrentPageNumber(currentPageNumber - 1)
+    }
+
+    const handleFirstPage = () => {
+        setCurrentPageNumber(0)
+    }
+
+    const handleLastPage = () => {
+        setCurrentPageNumber(deals_chuncks.length - 1)
+    }
+
+    // groups the items to display into groups of 6
+    const number_of_items_to_display_per_page = 6
+    const deals_chuncks = _.chunk(deals, number_of_items_to_display_per_page)
+
+    // Since arrays idx starts at 0 and the pages nav starts at 1, this line is to sync them
+    const pageDisplayed = currentPageNumber + 1
+
+    // this var keeps the loaded deals if they have been loaded (using isLoading state)
+    // or shows a message to the user that no deals have been loaded from the backend
+    let loaded_deals = null
+
+    if (isLoading === false) {
+        // when the deals have been loaded, check if there are some deals and display
+        // if not show the appropriate message
+        if (deals.length === 0) {
+            loaded_deals = <div className="noDeals"><h1>No Deals available at the moment</h1></div>
+        } else {
+            loaded_deals = <ProductsOnDeals items={deals_chuncks[currentPageNumber]}/>
+        }
+    }
+
+    // if the searchbar have been used to search, searchFilter will have some text and in that case 
+    // only send the searched products to the ProductsOnDeals component
+    const deals_to_display = searchFilter !== '' ? <ProductsOnDeals items={searchedItems}/> : loaded_deals
 
     return (
             <div>
                 <SearchBar onSearch={handleSearchedItems} items={deals}/>
                 <div className="row">
-                    {deals_to_display}
+                    {noItems ? <h2 className="no-item">No items matched your search</h2> : deals_to_display}
                 </div>
-                <NavButtons />
+                {noItems ? null : <NavButtons 
+                    currentPage={pageDisplayed} 
+                    allPages={deals_chuncks.length}
+                    nextPage={handleNextPage}
+                    prevPage={handlePreviousPage}
+                    firstPage={handleFirstPage}
+                    lastPage={handleLastPage}
+                />}
             </div>
     )
 }

@@ -12,6 +12,7 @@ import './home.css'
 const Home = () => {
     // Keeps all the items fetched from the backend
     const [items, setItems] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
     // This state keeps the array of items that matched the search
     const [searchedItems, setSearchedItems] = useState([])
     // This state keeps the text in the searc input field
@@ -25,6 +26,7 @@ const Home = () => {
         const fetch_data = async () => {
             const response_data = await itemsServices.getAllItems()
             setItems(response_data.items)
+            setIsLoading(false)
         }
         fetch_data()        
     }, [])
@@ -80,15 +82,15 @@ const Home = () => {
     return (
         <div>
             <SearchBar onSearch={handleSearchedItems} items={items}/>
-            {noItems ? <h2 className="no-item">No items matched your search</h2> : <Products items={items_chuncks[currentPageNumber]}/>}
-            <NavButtons 
+            {noItems ? <div className="no-item"><h2>No item(s) matched your search</h2></div> : (!isLoading && <Products items={items_chuncks[currentPageNumber]}/>)}
+            {noItems ? null : <NavButtons 
                 currentPage={pageDisplayed} 
                 allPages={items_chuncks.length}
                 nextPage={handleNextPage}
                 prevPage={handlePreviousPage}
                 firstPage={handleFirstPage}
                 lastPage={handleLastPage}
-            />
+            />}
         </div>
         
     )
